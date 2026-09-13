@@ -28,3 +28,22 @@ A client needing guidance within a single domain (e.g., legal or health) needs r
 - **NG4:** No user authentication in v1 — single-tenant, NGO admin manages documents
 - **NG5:** No fine-tuning in v1 — prompt engineering and RAG only
 - **NG6:** No document versioning in v1
+
+## 4. Component Specifications
+
+### 4.1 Domain Agent (Self-Reflective RAG)
+
+**Responsibility:** Handle queries within the configured domain using an agentic Self-RAG loop. This loop actively enforces precision, recall, and faithfulness during generation.
+
+**Self-RAG Loop Workflow:**
+1. **Retrieve:** Fetch documents from the vector store.
+2. **Grade Context (Enforcing Context Precision):** A custom LLM prompt evaluates each retrieved chunk. Irrelevant chunks are discarded to remove noise.
+3. **Assess Sufficiency (Enforcing Context Recall):** A custom LLM prompt checks if the remaining chunks contain *all* necessary information. If missing, it rewrites the search query and retrieves again.
+4. **Generate:** Draft an answer using the highly precise and sufficient context.
+5. **Grade Faithfulness & Relevance:** A custom LLM prompt critiques the draft. If it hallucinated (failed faithfulness) or missed the point (failed relevance), it rewrites the answer.
+
+| Property | Value |
+|----------|-------|
+| Logic Engine | Agentic loop (e.g., custom Python logic or LangGraph) |
+| Online Evaluation | Custom LLM Prompts (No external frameworks like Ragas/DeepEval to minimize latency) |
+| Hardware | Render (Orchestration) + Modal (Inference) |

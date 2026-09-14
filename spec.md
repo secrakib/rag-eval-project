@@ -532,16 +532,17 @@ If found: strip or mask before delivery. Log occurrence.
 | Layer | Technology | Version | Reason |
 |-------|-----------|---------|--------|
 | Web framework | FastAPI | 0.111+ | Async, native streaming support |
-| LLM inference | Mistral 7B Instruct GGUF Q4_K_M | v0.2 | Fits T4, strong instruction following |
-| Inference hosting | Modal | latest | Serverless GPU, $30/month free |
-| Embedding model | all-MiniLM-L6-v2 | — | 90MB, fast, good semantic quality |
-| Reranker | cross-encoder/ms-marco-MiniLM-L-6-v2 | — | CPU-friendly, strong relevance scoring |
-| Vector store | Qdrant Cloud | free tier | Persistent, namespaced collections |
-| RAG orchestration | LangChain | 0.2+ | Iterative chain + tool support |
-| Evaluation | RAGAS | 0.1+ | Faithfulness + context metrics |
-| Sparse retrieval | rank_bm25 | 0.2.2 | In-memory BM25 |
+| LLM generation | `qwen/qwen3.8-27b` | — | High-speed, cost-effective inference for real-time Self-RAG loop |
+| Inference hosting | Groq | — | Blazing fast LPUs, generous free tier |
+| Embedding model | `intfloat/multilingual-e5-large` | — | Top-tier MTEB multilingual benchmark (Bengali) |
+| Reranker | `BAAI/bge-reranker-v2-m3` | — | Multilingual cross-encoder improving Context Precision |
+| Embed/Rerank host | Pinecone Inference API | — | Serverless endpoints avoiding free-tier compute limits |
+| Vector store | Supabase (`pgvector`) | — | Consolidates relational data and vectors into one managed DB |
+| RAG logic engine | Custom Python / LangGraph | — | Agentic Self-RAG loop control |
+| Evaluation | Custom LLM Prompts | — | Real-time binary pass/fail grading (lower latency than Ragas) |
+| Input/Output Guardrails | `openai/gpt-oss-safeguard-20b` | — | Hosted on Groq; custom policy flexibility (toxicity, injection) |
+| PII Sanitization | Microsoft Presidio | — | Offline stripping of PII before chunking/embedding |
 | PDF parsing | PyMuPDF (fitz) | 1.24+ | Fast, handles complex PDFs |
-| Translation | NLLB-200-distilled-600M | — | Open-source Bengali support |
 | Observability | LangSmith | free tier | Full pipeline tracing |
 | Containerization | Docker (python:3.11-slim) | — | Render deployment |
 | App hosting | Render Web Service | free tier | Dockerized FastAPI |

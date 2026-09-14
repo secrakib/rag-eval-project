@@ -55,3 +55,22 @@ We chose Custom LLM Prompts for real-time Self-RAG evaluation over frameworks li
 1. **Lower Latency:** Frameworks execute complex, multi-step pipelines meant for offline testing. Custom prompts provide fast, binary decisions (e.g., "Pass/Fail") suitable for real-time user requests.
 2. **Resource Efficiency:** Frameworks make multiple heavy LLM calls per metric, which risks exhausting free-tier compute limits. Custom prompts require only a single, optimized inference call per check.
 3. **Simplicity:** Frameworks carry heavy dependencies and are heavily optimized for commercial APIs (like OpenAI). Custom prompts integrate directly and cleanly with our open-source model deployment.
+
+## 6. Infrastructure and Inference Layer
+
+### 6.1 Generation (LLM)
+- **Primary Provider:** Groq
+- **Primary Model:** `qwen/qwen3.8-27b` (High-speed, cost-effective inference for real-time Self-RAG loop)
+- **Future Support:** OpenRouter (for seamless swapping of models depending on cost, rate limits, or domain complexity)
+
+### 6.2 Embedding
+- **Model:** `intfloat/multilingual-e5-large`
+- **Why:** Selected for its top-tier performance on the MTEB multilingual benchmarks, specifically for its robust handling of Indic languages like Bengali compared to standard English-centric or Llama-based embedding models.
+
+### 6.3 Reranking
+- **Model:** `BAAI/bge-reranker-v2-m3`
+- **Why:** Excellent multilingual cross-encoder that drastically improves Context Precision by re-scoring the retrieved Bengali/English chunks before they hit the generation loop.
+
+### 6.4 Vector Database
+- **Provider:** Pinecone
+- **Why:** Fully managed, high-performance vector database with generous free-tier support and low latency for production RAG systems.

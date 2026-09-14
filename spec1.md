@@ -64,13 +64,16 @@ We chose Custom LLM Prompts for real-time Self-RAG evaluation over frameworks li
 - **Future Support:** OpenRouter (for seamless swapping of models depending on cost, rate limits, or domain complexity)
 
 ### 6.2 Embedding
-- **Model:** `intfloat/multilingual-e5-large`
-- **Why:** Selected for its top-tier performance on the MTEB multilingual benchmarks, specifically for its robust handling of Indic languages like Bengali compared to standard English-centric or Llama-based embedding models.
+- **Provider / Host:** Pinecone Inference API
+- **Model:** `multilingual-e5-large`
+- **Why:** High benchmark performance on multilingual tasks (Bengali & English). Pinecone's serverless Inference API avoids hosting embedding models on free-tier compute.
 
 ### 6.3 Reranking
+- **Provider / Host:** Pinecone Inference API
 - **Model:** `BAAI/bge-reranker-v2-m3`
-- **Why:** Excellent multilingual cross-encoder that drastically improves Context Precision by re-scoring the retrieved Bengali/English chunks before they hit the generation loop.
+- **Why:** Multilingual cross-encoder that improves Context Precision by re-scoring retrieved chunks. Hosted serverless via Pinecone Inference API.
 
 ### 6.4 Vector Database
-- **Provider:** Pinecone
-- **Why:** Fully managed, high-performance vector database with generous free-tier support and low latency for production RAG systems.
+- **Provider:** Supabase (PostgreSQL with `pgvector`)
+- **Why:** Consolidates document chunks, relational metadata, chat/evaluation logs, and vector embeddings into a single managed database with a generous free tier.
+

@@ -29,6 +29,9 @@ A client needing guidance within a single domain (e.g., legal or health) needs r
 - **NG5:** No fine-tuning in v1 — prompt engineering and RAG only
 - **NG6:** No document versioning in v1
 
+### Future Expansions
+- **FE1:** Multi-Channel Messaging — Integrate official APIs for Telegram (100% free), Messenger (free for 24h replies), and WhatsApp Cloud API (free tier limits) to allow vulnerable clients to access the AI via familiar chat apps instead of a web interface.
+
 ## 4. Component Specifications
 
 ### 4.1 Domain Agent (Self-Reflective RAG)

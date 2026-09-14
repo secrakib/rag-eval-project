@@ -5,7 +5,7 @@
 NGOs operating in Bangladesh need to answer complex queries from vulnerable clients within a single specific domain. They cannot afford commercial LLM APIs. Existing tools hallucinate without citations, operate only in English, or require expensive infrastructure.
 
 A client needing guidance within a single domain (e.g., legal or health) needs reliable, cited answers. The system will be domain agnostic, meaning it can be configured for any single specific domain. This system provides a hosted AI assistant that:
-- Runs entirely on free-tier infrastructure (Modal + Render)
+- Runs entirely on free-tier infrastructure
 - Answers in Bengali and English
 - Cites every claim to a source document
 - Refuses to answer when confidence falls below a safety threshold
@@ -17,7 +17,7 @@ A client needing guidance within a single domain (e.g., legal or health) needs r
 - **G1:** Answer queries within a specific single domain grounded in provided documents
 - **G2:** Support Bengali-language input and output
 - **G3:** Block uncited or low-confidence answers before delivery
-- **G4:** Run within Modal free tier ($30/month) and Render free tier (512MB RAM)
+- **G4:** Run within free-tier infrastructure (e.g., Render free tier, free external inference API)
 - **G5:** Pipeline is data-agnostic — any NGO can swap in their own documents
 - **G6:** Every pipeline decision is documented and benchmarked
 
@@ -46,4 +46,12 @@ A client needing guidance within a single domain (e.g., legal or health) needs r
 |----------|-------|
 | Logic Engine | Agentic loop (e.g., custom Python logic or LangGraph) |
 | Online Evaluation | Custom LLM Prompts (No external frameworks like Ragas/DeepEval to minimize latency) |
-| Hardware | Render (Orchestration) + Modal (Inference) |
+| Hardware | Render (Orchestration) + Inference Provider |
+
+## 5. Design Decisions
+
+### 5.1 Custom LLM Prompts vs. Evaluation Frameworks
+We chose Custom LLM Prompts for real-time Self-RAG evaluation over frameworks like Ragas or DeepEval because:
+1. **Lower Latency:** Frameworks execute complex, multi-step pipelines meant for offline testing. Custom prompts provide fast, binary decisions (e.g., "Pass/Fail") suitable for real-time user requests.
+2. **Resource Efficiency:** Frameworks make multiple heavy LLM calls per metric, which risks exhausting free-tier compute limits. Custom prompts require only a single, optimized inference call per check.
+3. **Simplicity:** Frameworks carry heavy dependencies and are heavily optimized for commercial APIs (like OpenAI). Custom prompts integrate directly and cleanly with our open-source model deployment.

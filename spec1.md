@@ -77,3 +77,16 @@ We chose Custom LLM Prompts for real-time Self-RAG evaluation over frameworks li
 - **Provider:** Supabase (PostgreSQL with `pgvector`)
 - **Why:** Consolidates document chunks, relational metadata, chat/evaluation logs, and vector embeddings into a single managed database with a generous free tier.
 
+## 7. Guardrails (Security & Privacy)
+
+### 7.1 Input Guardrail
+- **Strategy:** Lightweight local Regex (first-pass) + `openai/gpt-oss-safeguard-20b` via Groq (second-pass).
+- **Why:** Regex deterministically catches obvious PII (e.g., Bangladeshi NID formats, +880 phone numbers) at zero latency. The 20B Safeguard model on Groq evaluates custom policies (e.g., prompt injection, jailbreak attempts, toxicity) with negligible latency, offering greater flexibility than standard Llama Guard.
+
+### 7.2 Chunk Sanitizer
+- **Strategy:** Microsoft Presidio (Python library) running locally during offline document ingestion.
+- **Why:** Using custom Regex recognizers for Bengali names, NIDs, and phone numbers, Presidio strips PII from documents *before* chunking and embedding, ensuring the vector database remains completely clean.
+
+### 7.3 Output Guardrail
+- **Strategy:** Self-RAG Evaluator (Faithfulness/Relevance) + `openai/gpt-oss-safeguard-20b` via Groq.
+- **Why:** The Self-RAG loop ensures the generated answer is grounded in retrieved chunks. The final Safeguard pass enforces custom deployment policies (e.g., "no medical/legal advice beyond NGO scope", "no PII leakage") using the Harmony prompt format.

@@ -38,12 +38,11 @@ A client needing guidance within a single domain (e.g., legal or health) needs r
 
 **Responsibility:** Handle queries within the configured domain using an agentic Self-RAG loop. This loop actively enforces precision, recall, and faithfulness during generation.
 
-**Self-RAG Loop Workflow:**
+**Optimized 3-Call Self-RAG Workflow:**
 1. **Retrieve:** Fetch documents from the vector store.
-2. **Grade Context (Enforcing Context Precision):** A custom LLM prompt evaluates each retrieved chunk. Irrelevant chunks are discarded to remove noise.
-3. **Assess Sufficiency (Enforcing Context Recall):** A custom LLM prompt checks if the remaining chunks contain *all* necessary information. If missing, it rewrites the search query and retrieves again.
-4. **Generate:** Draft an answer using the highly precise and sufficient context.
-5. **Grade Faithfulness & Relevance:** A custom LLM prompt critiques the draft. If it hallucinated (failed faithfulness) or missed the point (failed relevance), it rewrites the answer.
+2. **Input Guardrail (Call 1):** Check user query for safety, injection, and domain relevance.
+3. **Combined Grade & Generate (Call 2):** A single LLM prompt evaluates if the retrieved context is sufficient. If NO, it signals for re-retrieval. If YES, it immediately generates the drafted answer.
+4. **Combined Output Guardrail & Faithfulness (Call 3):** A single LLM prompt evaluates if the generated draft is completely faithful to the context AND adheres to custom safety/NGO policies.
 
 | Property | Value |
 |----------|-------|
@@ -61,10 +60,14 @@ We chose Custom LLM Prompts for real-time Self-RAG evaluation over frameworks li
 
 ## 6. Infrastructure and Inference Layer
 
-### 6.1 Generation (LLM)
+### 6.1 Generation & Model Routing (LLM)
 - **Primary Provider:** Groq
-- **Primary Model:** `qwen/qwen3.8-27b` (High-speed, cost-effective inference for real-time Self-RAG loop)
-- **Future Support:** OpenRouter (for seamless swapping of models depending on cost, rate limits, or domain complexity)
+- **Model Split Strategy:** 
+  - `openai/gpt-oss-safeguard-20b`: Dedicated to Input/Output Guardrails and Faithfulness grading.
+  - `qwen/qwen3.8-27b`: Dedicated to Context Grading and Answer Generation.
+- **Why Split Models?:** Groq rate limits are per-model (30 RPM). By splitting the 3-call workflow across two models, we effectively double our throughput to 60 RPM, allowing ~15-20 user queries per minute sustainably.
+- **Mandatory Rate Limiter:** To prevent hard `429 Too Many Requests` failures, a local token-bucket rate limiter (e.g., `asyncio-throttle`) is **mandatory**. Each Groq call is wrapped and capped at 28 RPM per model.
+- **In-Process Queuing:** For the MVP, if limits are hit, requests are queued in-process behind the rate limiter (holding the connection open). Since wait times at 15 queries/min are negligible (a few seconds), this avoids building complex async job-status infra.
 
 ### 6.2 Embedding
 - **Provider / Host:** Pinecone Inference API
@@ -79,6 +82,10 @@ We chose Custom LLM Prompts for real-time Self-RAG evaluation over frameworks li
 ### 6.4 Vector Database
 - **Provider:** Supabase (PostgreSQL with `pgvector`)
 - **Why:** Consolidates document chunks, relational metadata, chat/evaluation logs, and vector embeddings into a single managed database with a generous free tier.
+
+### 6.5 Document Parsing
+- **Library:** `pdfplumber` (Python)
+- **Why:** While slightly slower than PyMuPDF, `pdfplumber` excels at understanding document layouts, columns, and tables out-of-the-box. Since NGO reports are often heavily formatted, this ensures highly accurate text extraction without relying on heavy OCR or paid cloud APIs.
 
 ## 7. Guardrails (Security & Privacy)
 
